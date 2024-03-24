@@ -7,12 +7,14 @@ import sqlite3
 
 BLK_NO = 19503561
 
+
 class TxnStore(object):
     def __init__(self, dbpath):
         print(f'open TxnStore... {dbpath}')
 
         self.con = sqlite3.connect(dbpath)
-        sql = ['CREATE TABLE IF NOT EXISTS txns ('
+        sql = [
+            'CREATE TABLE IF NOT EXISTS txns (',
             'ts INTEGER,',
             'blk_no INTEGER,',
             'hash TEXT,',
@@ -22,7 +24,8 @@ class TxnStore(object):
             'token TEXT,',
             'gas_px TEXT,',
             'gas_used TEXT',
-        ');']
+            ');'
+        ]
         sql = ''.join(sql)
         self.con.execute(sql)
         self.con.commit()
@@ -30,13 +33,16 @@ class TxnStore(object):
         self.ts_next_query = int(time.time())
 
     def get_cache_blk_head_tail(self):
-        cur = self.con.execute('SELECT blk_no FROM txns ORDER BY blk_no ASC LIMIT 1;');
+        cur = self.con.execute(
+            'SELECT blk_no FROM txns ORDER BY blk_no ASC LIMIT 1;')
         blk_no_head = cur.fetchone()
         blk_no_head = BLK_NO if blk_no_head is None else int(blk_no_head[0])
 
-        cur = self.con.execute('SELECT blk_no FROM txns ORDER BY blk_no DESC LIMIT 1;');
+        cur = self.con.execute(
+            'SELECT blk_no FROM txns ORDER BY blk_no DESC LIMIT 1;')
         blk_no_tail = cur.fetchone()
-        blk_no_tail = BLK_NO if blk_no_tail is None else int(blk_no_tail[0]) + 1
+        blk_no_tail = BLK_NO if blk_no_tail is None else \
+            int(blk_no_tail[0]) + 1
 
         return blk_no_head, blk_no_tail
 
@@ -111,7 +117,7 @@ def get_base_url():
 
 
 def get_qurl_tx(
-    contract_address=None,  #'0x9f8f72aa9304c8b593d555f12ef6589cc3a579a2'
+    contract_address=None,
     address='0x88e6a0c2ddd26feeb64f039a2c41296fcb3f5640',
     sblk=0,
     eblk=99999999,
@@ -122,7 +128,8 @@ def get_qurl_tx(
         get_base_url(),
         '?module=account',
         '&action=tokentx',
-        f'&contractaddress={contract_address}' if contract_address is not None else '',
+        f'&contractaddress={contract_address}'
+        if contract_address is not None else '',
         f'&address={address}',
         f'&page={page}',
         f'&offset={offset}',
@@ -159,7 +166,8 @@ def pdata(lst):
         tok = one['tokenSymbol']
         gas = float(one['gas']) / 1_000_000_000
         gaspx = float(one['gasPrice']) / 1_000_000_000
-        print(ts, blkno, src, '>>>', dst, f'{qty:.2f}{tok} ({gas*gaspx:.2f}ETH)')
+        print(
+            ts, blkno, src, '>>>', dst, f'{qty:.2f}{tok} ({gas*gaspx:.2f}ETH)')
 
 
 def query_first_blk():
