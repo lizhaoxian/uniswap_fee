@@ -25,7 +25,8 @@ class TxnStore(object):
             'value TEXT,',
             'token TEXT,',
             'gas_px TEXT,',
-            'gas_used TEXT',
+            'gas_used TEXT,',
+            'eth_usd REAL',
             ');'
         ]
         sql = ''.join(sql)
@@ -33,6 +34,7 @@ class TxnStore(object):
         self.con.commit()
 
         self.ts_next_query = int(time.time())
+        self.eth_usd_cache = {}
 
     def get_cache_blk_head_tail(self):
         cur = self.con.execute(
@@ -100,6 +102,9 @@ class TxnStore(object):
         values = []
 
         for one in txns:
+            ts = int(one['timeStamp'])
+            eth_usd_px = get_px_eth_usd(ts, self.eth_usd_cache)
+            eth_usd_px = f'{eth_usd_px:.2f}'
             sql = ','.join([
                 one['timeStamp'],
                 one['blockNumber'],
@@ -110,6 +115,7 @@ class TxnStore(object):
                 f"\"{one['tokenSymbol']}\"",
                 f"\"{one['gasPrice']}\"",
                 f"\"{one['gasUsed']}\"",
+                eth_usd_px,
             ])
 
             sql = f'({sql})'
@@ -119,6 +125,25 @@ class TxnStore(object):
         sql = f'INSERT INTO txns VALUES {values};'
         self.con.execute(sql)
         self.con.commit()
+
+
+def get_px_eth_usd(ts, cache):
+    ts_query = int(ts / (15 * 60)) * 15 * 60 * 1000
+    if ts_query in cache:
+        return cache[ts_query]
+
+    url = 'https://api.binance.com/api/v3/klines?' + \
+          f'symbol=ETHUSDT&interval=15m&startTime={ts_query}&limit=30'
+    try:
+        r = requests.get(url)
+        for item in r.json():
+            k = item[0]
+            v = float(item[4])
+            if k not in cache:
+                cache[k] = v
+        return cache[ts_query]
+    except Exception as _:
+        return -1
 
 
 def get_base_url():
@@ -173,10 +198,11 @@ def pdata(lst):
         dst = one['to']
         qty = float(one['value']) / (10**nodigit)
         tok = one['tokenSymbol']
-        gas = float(one['gas']) / 1_000_000_000
+        gas_used = float(one['gasUsed']) / 1_000_000_000
         gaspx = float(one['gasPrice']) / 1_000_000_000
         print(
-            ts, blkno, src, '>>>', dst, f'{qty:.2f}{tok} ({gas*gaspx:.2f}ETH)')
+            ts, blkno, src, '>>>', dst,
+            f'{qty:.2f}{tok} ({gas_used*gaspx:.2f}ETH)')
 
 
 def query_first_blk():
