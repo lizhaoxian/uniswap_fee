@@ -5,6 +5,8 @@ import pandas as pd
 import requests
 import sqlite3
 
+# block which are around current, this is used so program can fast align to
+# current block
 BLK_NO = 19503561
 
 
@@ -47,9 +49,17 @@ class TxnStore(object):
         return blk_no_head, blk_no_tail
 
     def query_at_head(self):
+        print('query_at_head ...')
         blk_head, _ = self.get_cache_blk_head_tail()
+        self.query_from(blk_head - 100, blk_head)
 
-        query_from_blk = blk_head - 100
+    def query_at_tail(self):
+        print('query_at_tail ...')
+        _, blk_tail = self.get_cache_blk_head_tail()
+        self.query_from(blk_tail, blk_tail + 100)
+
+    def query_from(self, blkno, before_block):
+        query_from_blk = blkno
         page = 1
         txns = []
 
@@ -70,18 +80,17 @@ class TxnStore(object):
             if data['status'] != '1':
                 print('status :', data['status'])
                 print('message:', data['message'])
-                print(f'{query_from_blk} done')
+                print(f'{query_from_blk} ~ {before_block} done')
                 break
 
             items = data['result']
-            items = [x for x in items if int(x['blockNumber']) < blk_head]
+            items = [x for x in items if int(x['blockNumber']) < before_block]
 
             if len(items) == 0:
-                print(f'{query_from_blk} done')
+                print(f'{query_from_blk} ~ {before_block} done')
                 break
 
             print(f"inc {len(items)} next_page {page}")
-            pdata(items)
             txns += items
 
         if len(txns) > 0:
@@ -232,3 +241,4 @@ print(store.get_cache_blk_head_tail())
 
 while True:
     store.query_at_head()
+    store.query_at_tail()
