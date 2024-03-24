@@ -1,0 +1,88 @@
+openapi: 3.0.3
+info:
+  title: Uniswap V3 USDC/ETH Pool Tx Fee API Server
+  description: |-
+    This is a simple Uniswap V3 USDC/ETH Pool Tx Fee Server based on the OpenAPI 3.0 specification.  
+    You can find out more about Swagger at [https://swagger.io](https://swagger.io).  
+
+    Some useful links:
+    - [The Code repository](https://github.com/todo)
+
+  contact:
+    email: lizhaoxianfgg@gmail.com
+  license:
+    name: Apache 2.0
+    url: http://www.apache.org/licenses/LICENSE-2.0.html
+  version: 0.0.1
+externalDocs:
+  description: Find out more about Swagger
+  url: http://swagger.io
+servers:
+  - url: https://localhost/api/v1
+tags:
+  - name: tx
+    description: transactions
+paths:
+  /tx:
+    get:
+      tags: 
+        - tx
+      summary: List Txns
+      parameters:
+        - name: from_timestamp
+          in: query
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: Successful operation
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Txn'          
+  /tx/{hash}:
+    get:
+      tags:
+        - tx
+      summary: Find Tx by Hash
+      parameters:
+        - name: hash
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Txn'          
+
+components:
+  schemas:
+    Txn:
+      type: object
+      properties:
+        hash:
+          type: string
+        timestamp:
+          type: integer
+        address_from:
+          type: string
+        address_to:
+          type: string
+        value:
+          type: number
+        token:
+          type: string
+        fee_eth:
+          type: number
+        fee_usd:
+          type: number
+
