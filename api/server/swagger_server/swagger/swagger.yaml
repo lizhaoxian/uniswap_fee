@@ -1,0 +1,102 @@
+openapi: 3.0.3
+info:
+  title: Uniswap V3 USDC/ETH Pool Tx Fee API Server
+  description: "This is a simple Uniswap V3 USDC/ETH Pool Tx Fee Server based on the\
+    \ OpenAPI 3.0 specification.  \nYou can find out more about Swagger at [https://swagger.io](https://swagger.io).\
+    \  \n\nSome useful links:\n- [The Code repository](https://github.com/todo)"
+  contact:
+    email: lizhaoxianfgg@gmail.com
+  license:
+    name: Apache 2.0
+    url: http://www.apache.org/licenses/LICENSE-2.0.html
+  version: 0.0.1
+externalDocs:
+  description: Find out more about Swagger
+  url: http://swagger.io
+servers:
+- url: https://localhost/api/v1
+tags:
+- name: tx
+  description: transactions
+paths:
+  /tx:
+    get:
+      tags:
+      - tx
+      summary: List Txns
+      operationId: tx_get
+      parameters:
+      - name: from_timestamp
+        in: query
+        required: true
+        style: form
+        explode: true
+        schema:
+          type: integer
+      responses:
+        "200":
+          description: Successful operation
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Txn'
+                x-content-type: application/json
+      x-openapi-router-controller: swagger_server.controllers.tx_controller
+  /tx/{hash}:
+    get:
+      tags:
+      - tx
+      summary: Find Tx by Hash
+      operationId: tx_hash_get
+      parameters:
+      - name: hash
+        in: path
+        required: true
+        style: simple
+        explode: false
+        schema:
+          type: string
+      responses:
+        "200":
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Txn'
+                x-content-type: application/json
+      x-openapi-router-controller: swagger_server.controllers.tx_controller
+components:
+  schemas:
+    Txn:
+      type: object
+      properties:
+        hash:
+          type: string
+        timestamp:
+          type: integer
+        address_from:
+          type: string
+        address_to:
+          type: string
+        value:
+          type: number
+        token:
+          type: string
+        fee_eth:
+          type: number
+        fee_usd:
+          type: number
+      example:
+        fee_eth: 1.46581298050294517310021547018550336360931396484375
+        address_to: address_to
+        fee_usd: 5.962133916683182377482808078639209270477294921875
+        value: 6.02745618307040320615897144307382404804229736328125
+        hash: hash
+        timestamp: 0
+        address_from: address_from
+        token: token
+
