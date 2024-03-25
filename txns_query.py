@@ -36,6 +36,19 @@ class TxnStore(object):
         self.ts_next_query = int(time.time())
         self.eth_usd_cache = {}
 
+    def get_cache_blk_head_tail_ts(self):
+        cur = self.con.execute(
+            'SELECT ts FROM txns ORDER BY ts ASC LIMIT 1;')
+        ts_head = cur.fetchone()
+        ts_head = 0 if ts_head is None else int(ts_head[0])
+
+        cur = self.con.execute(
+            'SELECT ts FROM txns ORDER BY ts DESC LIMIT 1;')
+        ts_tail = cur.fetchone()
+        ts_tail = 0 if ts_tail is None else int(ts_tail[0]) + 1
+
+        return ts_head, ts_tail
+
     def get_cache_blk_head_tail(self):
         cur = self.con.execute(
             'SELECT blk_no FROM txns ORDER BY blk_no ASC LIMIT 1;')
@@ -260,11 +273,22 @@ def query():
         txns += data['result']
 
 
-dbpath = sys.argv[1]
-store = TxnStore(dbpath)
+def main():
+    dbpath = sys.argv[1]
+    store = TxnStore(dbpath)
 
-print(store.get_cache_blk_head_tail())
+    print(store.get_cache_blk_head_tail())
 
-while True:
-    store.query_at_head()
-    store.query_at_tail()
+    while True:
+        store.query_at_head()
+        store.query_at_tail()
+        ts0, ts1 = store.get_cache_blk_head_tail_ts()
+        print(
+            'covered txns period: ',
+            pd.Timestamp(float(ts0), unit='s').strftime('%Y%m%d %H:%M:%S UTC'),
+            pd.Timestamp(float(ts1), unit='s').strftime('%Y%m%d %H:%M:%S UTC'),
+        )
+
+
+if __name__ == '__main__':
+    main()
