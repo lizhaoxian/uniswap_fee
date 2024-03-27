@@ -161,7 +161,7 @@ class TxnStore(object):
                 f"\"{one['hash']}\"",
                 f"\"{one['from']}\"",
                 f"\"{one['to']}\"",
-                f"\"{one['value']}\"",
+                f"\"{float(one['value']) / (10**float(one['tokenDecimal']))}\"",
                 f"\"{one['tokenSymbol']}\"",
                 f"\"{one['gasPrice']}\"",
                 f"\"{one['gasUsed']}\"",
