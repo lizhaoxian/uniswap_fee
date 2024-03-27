@@ -4,12 +4,10 @@ services:
       dockerfile: Dockerfile.txns_query
     volumes:
       - ./data/:/workspace/data/
-      - ./log/:/workspace/log/
   swagger:
     build: 
       dockerfile: Dockerfile.swagger
     volumes:
       - ./data/:/workspace/data/
-      - ./log/:/workspace/log/
     ports:
       - "8081:8080"

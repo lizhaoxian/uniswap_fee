@@ -1,0 +1,19 @@
+services:
+  txns_query_test:
+    build: 
+      dockerfile: Dockerfile.txns_query_test
+  swagger_timeout:
+    build: 
+      dockerfile: Dockerfile.swagger_timeout
+    volumes:
+      - ./data_test/:/workspace/data/
+    networks:
+      - test_net
+  swagger_test:
+    build: 
+      dockerfile: Dockerfile.swagger_test
+    networks:
+      - test_net
+networks:
+  test_net:
+    name: test_net
