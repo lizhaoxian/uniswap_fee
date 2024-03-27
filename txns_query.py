@@ -106,9 +106,13 @@ class TxnStore(object):
         """ Query and Store txns later than queue head """
         logger.info('query_at_tail ...')
         _, blk_tail = self.get_db_blk_head_tail()
-        self.query_from(blk_tail, blk_tail + 100, test_hold=test_hold, max_retry=0)
+        self.query_from(
+            blk_tail, blk_tail + 100, test_hold=test_hold, max_retry=0)
 
-    def query_from(self, blkno, before_block, test_hold=False, check_dup=False, max_retry=MAX_RETRY):
+    def query_from(
+        self, blkno, before_block,
+        test_hold=False, check_dup=False, max_retry=MAX_RETRY
+    ):
         """ Query and Store txns from blkno till before_block (exclusive) """
         logger.info(f'query_from ... {blkno} {before_block}')
 
@@ -140,7 +144,7 @@ class TxnStore(object):
 
             if data['status'] != '1':
                 error_cnt += 1
-                logger.info(f'status : {data["status"]}  ERROR_CNT:{error_cnt}')
+                logger.info(f'status : {data["status"]} ERROR_CNT:{error_cnt}')
                 logger.info(f'message: {data["message"]}')
                 logger.info(f'{query_from_blk} ~ {before_block} done')
                 continue
@@ -167,7 +171,8 @@ class TxnStore(object):
         if len(txns) > 0:
             self._save(txns, check_dup)
 
-        # when test, recreate obj will not follow the query gap, we hold before exit
+        # when test, recreate obj will not follow the query gap,
+        # we hold before exit
         if test_hold:
             time.sleep(PER_QUERY_GAP_SEC)
 
@@ -187,15 +192,17 @@ class TxnStore(object):
                 continue
 
             ts = int(one['timeStamp'])
-            eth_usd_px, ts_next_query = get_px_eth_usd(ts, self.eth_usd_cache, ts_next_query)
+            eth_usd_px, ts_next_query = get_px_eth_usd(
+                ts, self.eth_usd_cache, ts_next_query)
             eth_usd_px = f'{eth_usd_px:.2f}'
+            value = float(one['value']) / (10**float(one['tokenDecimal']))
             sql = ','.join([
                 one['timeStamp'],
                 one['blockNumber'],
                 f"\"{vhash}\"",
                 f"\"{one['from']}\"",
                 f"\"{one['to']}\"",
-                f"\"{float(one['value']) / (10**float(one['tokenDecimal']))}\"",
+                f"\"{value}\"",
                 f"\"{one['tokenSymbol']}\"",
                 f"\"{one['gasPrice']}\"",
                 f"\"{one['gasUsed']}\"",
@@ -416,7 +423,6 @@ def store_specified_ts_range(dbpath, ts0, ts1):
 
         blkno2 = blkno3
         blkno3 = blkno2 + 1000
-
 
 
 def main():

@@ -9,7 +9,9 @@ logger = logging.getLogger(__name__)
 def test_get_by_ts(hostname='0.0.0.0'):
     logger.info('test_get_by_ts ...')
 
-    r = requests.get(f'http://{hostname}:8080/api/v1/tx', params={'from_timestamp': '1'})
+    r = requests.get(
+        f'http://{hostname}:8080/api/v1/tx',
+        params={'from_timestamp': '1'})
     if r.status_code == 200 and len(r.json()) == 100:
         pass
     else:

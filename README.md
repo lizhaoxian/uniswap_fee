@@ -69,3 +69,8 @@ docker compose --file compose-batch.yaml up --build
 ## Real & Historical Txns Recording
 Image Txns are stored as a time ordered queue, the backend code will gradually fill up the queue's 
 head & tail step by step. Head is the earliest txns stored, tail is the most recent txns stored.
+
+When you mix batch job and historical recording, you might end up with a hole in the middle of the 
+Txns queue, so it is only suggested to do batch job when you are aware of the consequences.
+(You can fill up the hole with more batch jobs later, but that will require study over the stored
+txns)
