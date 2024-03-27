@@ -13,6 +13,10 @@ This will setup
 1. backend to query more txns (historically and fill up to current)
 2. swagger rest api server at (0.0.0.0:8080, you can try access here http://0.0.0.0:8080/api/v1/ui/)
 
+At frist run, the txns data will be build from most recent txns and adding historical/current data gradually
+
+At 2nd or more run, the txns data will be built from where it was left previously (./data/db.db keeps this data)
+
 ## Test with docker compose
 
 ```
@@ -21,7 +25,7 @@ docker compose --file compose-test.yaml up --build
 This will trigger test
 1. unittest for backend code
 2. integration test for rest api
-3. timeout entire test operation at 2 minutes
+3. timeout entire test operation at 2 minutes (all test should have been finished)
 
 ## Run directly
 To run directly, you need to setup the environment at ./environment/ and install pyenv requirement.txt
@@ -35,3 +39,7 @@ bash loop_swagger.sh
 # backend query historical & current txns
 bash txns_query.sh
 ```
+
+## Txns Storage
+Txns are stored as a time ordered queue, the backend code will gradually fill up the queue's 
+head & tail step by step. Head is the earliest txns stored, tail is the most recent txns stored.
