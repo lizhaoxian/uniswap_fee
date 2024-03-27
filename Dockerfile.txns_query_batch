@@ -1,0 +1,7 @@
+FROM python:3.8-bullseye
+WORKDIR /workspace
+RUN apt-get update
+RUN apt-get install -y --no-install-recommends make automake gcc g++ subversion python3-dev musl-dev 
+COPY . .
+RUN pip install -r requirements.txt
+CMD ["python", "-u", "txns_query.py", "/workspace/data/db.db", "1708608524", "1708638524"]

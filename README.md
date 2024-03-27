@@ -40,6 +40,37 @@ bash loop_swagger.sh
 bash txns_query.sh
 ```
 
-## Txns Storage
-Txns are stored as a time ordered queue, the backend code will gradually fill up the queue's 
+## Query Fee
+This query service is implemented by swagger, you can discover more from the swagger UI.
+
+query the txn by its hash value
+
+```
+http://0.0.0.0:8080/api/v1/tx/{hash}
+```
+
+query the txn by from_timestamp, the result display the 100 records >= from_timestamp
+
+```
+http://0.0.0.0:8080/api/v1/tx?from_timestamp={value}
+```
+
+## Batch Job
+To download historical txns for a period of time.
+
+Modify file Dockerfile.txns_query_batch, to set timestamp for the period
+
+Trigger below command to download, current api is at 6 seconds per 100 records, 
+faster download will require better API key.
+```
+docker compose --file compose-batch.yaml up --build
+```
+
+## Real & Historical Txns Recording
+Image Txns are stored as a time ordered queue, the backend code will gradually fill up the queue's 
 head & tail step by step. Head is the earliest txns stored, tail is the most recent txns stored.
+
+When you mix batch job and historical recording, you might end up with a hole in the middle of the 
+Txns queue, so it is only suggested to do batch job when you are aware of the consequences.
+(You can fill up the hole with more batch jobs later, but that will require study over the stored
+txns)

@@ -1,0 +1,6 @@
+services:
+  txns_query_batch:
+    build: 
+      dockerfile: Dockerfile.txns_query_batch
+    volumes:
+      - ./data/:/workspace/data/
